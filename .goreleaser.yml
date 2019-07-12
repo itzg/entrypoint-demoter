@@ -24,7 +24,6 @@ nfpms:
     license: MIT
     formats:
       - deb
-      - rpm
     overrides:
       rpm:
         replacements:
