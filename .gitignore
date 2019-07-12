@@ -1,3 +1,5 @@
 /.idea/
 *.iml
 /dist/
+/entrypoint-demoter
+/entrypoint-demoter.exe
