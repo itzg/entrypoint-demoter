@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
 	"strconv"
