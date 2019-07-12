@@ -1,0 +1,13 @@
+FROM golang:1.12 as build
+
+WORKDIR /build
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN go build -o entrypoint-demoter .
+
+ENTRYPOINT ["/build/entrypoint-demoter"]
+
+RUN mkdir /test
+RUN useradd -u 1024 -g 100 -d /test/test1024 -m test1024

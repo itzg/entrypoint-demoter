@@ -1,0 +1,40 @@
+before:
+  hooks:
+    - go mod download
+builds:
+- env:
+  - CGO_ENABLED=0
+archives:
+- replacements:
+    darwin: MacOS
+    linux: Linux
+    windows: Windows
+  format_overrides:
+    - goos: windows
+      format: zip
+nfpms:
+  - id: default
+    vendor: Geoff Bourne
+    homepage: https://github.com/itzg/entrypoint-demoter
+    maintainer: Geoff Bourne <itzeoff@gmail.com>
+    description: Container entrypoint that can demote uid and gid from env or matching directory
+    license: MIT
+    formats:
+      - deb
+      - rpm
+    overrides:
+      rpm:
+        replacements:
+          amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .ShortCommit }}-snapshot"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+    - '^ci:'
+    - '^misc:'
