@@ -1,5 +1,5 @@
 [![CircleCI](https://circleci.com/gh/itzg/entrypoint-demoter.svg?style=svg)](https://circleci.com/gh/itzg/entrypoint-demoter)
-[!![GitHub release](https://img.shields.io/github/release/itzg/entrypoint-demoter.svg)](https://github.com/itzg/entrypoint-demoter/releases/latest)
+[![GitHub release](https://img.shields.io/github/release/itzg/entrypoint-demoter.svg)](https://github.com/itzg/entrypoint-demoter/releases/latest)
 
 # Usage
 
