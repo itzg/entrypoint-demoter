@@ -8,14 +8,12 @@ import (
 )
 
 type StdinHandler struct {
-	stdinMux    chan []byte
-	noWarnStdin bool
+	stdinMux chan []byte
 }
 
-func NewStdinHandler(noWarnStdin bool) *StdinHandler {
+func NewStdinHandler() *StdinHandler {
 	return &StdinHandler{
-		noWarnStdin: noWarnStdin,
-		stdinMux:    make(chan []byte, 1),
+		stdinMux: make(chan []byte, 1),
 	}
 }
 
@@ -41,9 +39,8 @@ func (h *StdinHandler) Handle(ctx context.Context, stdinPipe io.Writer) {
 			buf := make([]byte, 1024)
 			n, err := os.Stdin.Read(buf)
 			if err != nil {
-				if !h.noWarnStdin {
-					log.WithError(err).Warn("failed to read stdin")
-				}
+				// container's don't usually have input opened, so just a debug if this fails
+				log.WithError(err).Debug("failed to read stdin")
 				return
 			}
 			h.stdinMux <- buf[:n]

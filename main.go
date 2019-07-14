@@ -25,7 +25,6 @@ var (
 	showVersion = flag.Bool("version", false, "Show version info and exit")
 	stdinOnTerm = flag.String("stdin-on-term", "",
 		"If set, the given content will be written to the sub-command's stdin when TERM signal is received")
-	noWarnStdin = flag.Bool("no-warn-stdin", false, "Don't warn when unable to read from stdin")
 )
 
 func main() {
@@ -71,6 +70,7 @@ func runCommand(uid uint32, gid uint32, commandAndArgs []string) error {
 	if err != nil {
 		return errors.Wrap(err, "unable to get stdin pipe")
 	}
+	//noinspection GoUnhandledErrorResult
 	defer stdinPipe.Close()
 
 	if uid != 0 || gid != 0 {
@@ -85,7 +85,7 @@ func runCommand(uid uint32, gid uint32, commandAndArgs []string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	stdinHandler := NewStdinHandler(*noWarnStdin)
+	stdinHandler := NewStdinHandler()
 	stdinHandler.Handle(ctx, stdinPipe)
 
 	setupSignalForwarding(ctx, command, stdinHandler)
