@@ -26,7 +26,7 @@ assert "UID" "uid=1000 gid=0(root) groups=0(root)" "$(docker run --rm -e UID=100
 assert "GID" "uid=0(root) gid=1000 groups=1000" "$(docker run --rm -e GID=1000 entrypoint-demoter-test id)"
 assert "UID+GID" "uid=1000 gid=1000 groups=1000" "$(docker run --rm -e UID=1000 -e GID=1000 entrypoint-demoter-test id)"
 
-id=$(docker run -d entrypoint-demoter-test --no-warn-stdin --stdin-on-term "hello" cat -)
+id=$(docker run -d entrypoint-demoter-test --stdin-on-term "hello" cat -)
 # shellcheck disable=SC2086
 docker stop ${id}
 # shellcheck disable=SC2086
