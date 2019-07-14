@@ -29,7 +29,11 @@ the sub-command with the current uid and gid.
 
 ## Command-line
 
-- `--match path` : uses the ownership of the given path to determine a user and group ID
+- `--match PATH` : uses the ownership of the given path to determine a user and group ID
+- `--stdin-on-term MESSAGE` : some applications prefer to be gracefully stopped with a command on
+   stdin rather than handling SIGTERM, such as Minecraft servers. 
+   The `MESSAGE` and a newline will be written to the sub-command's stdin when a `TERM` signal is received.
+- `--no-warn-stdin` : don't log a warning if stdin is closed for reading
 - `--debug` : enables debug logging
 - `--version` : show version and exit
 

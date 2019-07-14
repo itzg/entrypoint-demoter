@@ -4,10 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
 	"os/signal"
+	"syscall"
 )
 
 var (
@@ -21,6 +23,9 @@ var (
 	match       = flag.String("match", "", "Matches the user/group to the owner of the given path")
 	debug       = flag.Bool("debug", false, "Enable debug logging")
 	showVersion = flag.Bool("version", false, "Show version info and exit")
+	stdinOnTerm = flag.String("stdin-on-term", "",
+		"If set, the given content will be written to the sub-command's stdin when TERM signal is received")
+	noWarnStdin = flag.Bool("no-warn-stdin", false, "Don't warn when unable to read from stdin")
 )
 
 func main() {
@@ -61,20 +66,29 @@ func runCommand(uid uint32, gid uint32, commandAndArgs []string) error {
 	command := exec.Command(commandAndArgs[0], commandAndArgs[1:]...)
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
-	command.Stdin = os.Stdin
+
+	stdinPipe, err := command.StdinPipe()
+	if err != nil {
+		return errors.Wrap(err, "unable to get stdin pipe")
+	}
+	defer stdinPipe.Close()
 
 	if uid != 0 || gid != 0 {
 		setCredentials(uid, gid, command)
 	}
 
-	err := command.Start()
+	err = command.Start()
 	if err != nil {
 		return err
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	setupSignalForwarding(ctx, command)
+
+	stdinHandler := NewStdinHandler(*noWarnStdin)
+	stdinHandler.Handle(ctx, stdinPipe)
+
+	setupSignalForwarding(ctx, command, stdinHandler)
 
 	err = command.Wait()
 	if err != nil {
@@ -84,7 +98,7 @@ func runCommand(uid uint32, gid uint32, commandAndArgs []string) error {
 	return nil
 }
 
-func setupSignalForwarding(ctx context.Context, cmd *exec.Cmd) {
+func setupSignalForwarding(ctx context.Context, cmd *exec.Cmd, stdinHandler *StdinHandler) {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals)
 
@@ -92,6 +106,14 @@ func setupSignalForwarding(ctx context.Context, cmd *exec.Cmd) {
 		for {
 			select {
 			case sig := <-signals:
+				log.WithField("signal", sig).Debug("Forwarding signal")
+
+				if *stdinOnTerm != "" && sig == syscall.SIGTERM {
+					log.WithField("message", *stdinOnTerm).Debug("Sending message on stdin due to SIGTERM")
+					stdinHandler.Send([]byte(*stdinOnTerm + "\n"))
+					continue
+				}
+
 				err := cmd.Process.Signal(sig)
 				if err != nil {
 					log.WithError(err).Error("Failed to signal sub-command")
