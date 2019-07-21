@@ -1,8 +1,8 @@
 build:
-	go build .
+	go build ./cmd/entrypoint-demoter
 
 test:
-	go test .
+	go test ./...
 	./test.sh
 
 release:

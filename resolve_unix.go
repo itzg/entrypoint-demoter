@@ -1,6 +1,6 @@
 // +build linux darwin
 
-package main
+package entrypoint_demoter
 
 import (
 	"github.com/pkg/errors"
@@ -11,13 +11,13 @@ import (
 	"syscall"
 )
 
-func resolveIds() (uint32, uint32, error) {
+func ResolveIds(match string) (uint32, uint32, error) {
 	var matchStatT *syscall.Stat_t
 	var uid, gid uint32
-	if *match != "" {
-		log.Debugf("Using %s to match uid and gid", *match)
+	if match != "" {
+		log.Debugf("Using %s to match uid and gid", match)
 
-		matchInfo, err := os.Stat(*match)
+		matchInfo, err := os.Stat(match)
 		if err != nil {
 			return 0, 0, errors.Wrap(err, "unable to inspect match path")
 		}

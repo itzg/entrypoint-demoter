@@ -1,6 +1,6 @@
 // +build windows
 
-package main
+package entrypoint_demoter
 
 import (
 	"github.com/pkg/errors"
@@ -10,10 +10,10 @@ import (
 	"strconv"
 )
 
-func resolveIds() (uint32, uint32, error) {
+func ResolveIds(match string) (uint32, uint32, error) {
 	var uid, gid uint32
-	if *match != "" {
-		log.Debugf("Would use %s to match uid and gid", *match)
+	if match != "" {
+		log.Debugf("Would use %s to match uid and gid", match)
 	}
 
 	uid, err := resolveIdPart("UID")
@@ -42,6 +42,7 @@ func resolveIdPart(idPart string) (uint32, error) {
 	return 0, nil
 }
 
+//noinspection GoUnusedParameter
 func setCredentials(uid uint32, gid uint32, command *exec.Cmd) {
 	// do nothing, just log
 	log.

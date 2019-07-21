@@ -1,4 +1,6 @@
-.idea/**
+.idea
 *.iml
-dist/**
+dist
 test.sh
+entrypoint-demoter
+entrypoint-demoter.exe

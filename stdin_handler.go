@@ -1,4 +1,4 @@
-package main
+package entrypoint_demoter
 
 import (
 	"context"

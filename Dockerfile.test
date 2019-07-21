@@ -5,7 +5,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go build -o entrypoint-demoter .
+RUN go build ./cmd/entrypoint-demoter
 
 ENTRYPOINT ["/build/entrypoint-demoter"]
 
