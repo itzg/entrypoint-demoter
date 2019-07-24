@@ -3,7 +3,8 @@
 
 # Motivation
 
-It is  highly recommended that processes within containers do not run as root; however, that
+It is  highly recommended that processes within containers do not run as root in order to 
+[prevent container breakouts](https://developer.okta.com/blog/2019/07/18/container-security-a-developer-guide#prevent-container-breakouts); however, that
 goal is hard to maintain when attached volumes come into play. For example, 
 [Synology's DiskStation](https://www.synology.com/en-us/dsm)
 manages ownership of attachable volumes as regular UNIX users; however, its Docker integration
