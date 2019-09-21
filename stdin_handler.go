@@ -2,6 +2,7 @@ package entrypoint_demoter
 
 import (
 	"context"
+	"errors"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"os"
@@ -39,8 +40,13 @@ func (h *StdinHandler) Handle(ctx context.Context, stdinPipe io.Writer) {
 			buf := make([]byte, 1024)
 			n, err := os.Stdin.Read(buf)
 			if err != nil {
-				// container's don't usually have input opened, so just a debug if this fails
-				log.WithError(err).Debug("failed to read stdin")
+				if errors.Is(err, io.EOF) {
+					// container's don't usually have input opened, so just a debug if this fails
+					log.Debug("stdin is detached, so forwarding is disabled")
+				} else {
+					log.WithError(err).Warn("failed to read stdin")
+				}
+
 				return
 			}
 			h.stdinMux <- buf[:n]
