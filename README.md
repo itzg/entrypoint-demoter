@@ -54,3 +54,11 @@ ENTRYPOINT ["/usr/local/bin/entrypoint-demoter", "--match", "/data", "/entry.sh"
 ```
 
 > The full context of this example can be seen [in this Dockerfile](https://github.com/itzg/docker-minecraft-bedrock-server/blob/master/Dockerfile)
+
+# Testing
+
+On a Linux system with Make and Docker installed invoke:
+
+```
+make test
+```
