@@ -3,7 +3,6 @@ build:
 
 test:
 	go test ./...
-	./test.sh
 
 snapshot:
 	goreleaser release --snapshot --rm-dist
