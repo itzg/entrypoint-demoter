@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e -o pipefail
+set -eo pipefail
 
 assert() {
   name="$1"
