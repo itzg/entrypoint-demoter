@@ -2,8 +2,9 @@ package entrypoint_demoter
 
 import (
 	"context"
-	"github.com/pkg/errors"
+	"fmt"
 	log "github.com/sirupsen/logrus"
+	"io"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -11,16 +12,29 @@ import (
 )
 
 func RunCommand(uid uint32, gid uint32, stdinOnTerm string, commandAndArgs []string) error {
+	return RunCommandWithListeners(uid, gid, stdinOnTerm, commandAndArgs)
+}
+
+func RunCommandWithListeners(uid uint32, gid uint32, stdinOnTerm string, commandAndArgs []string, listeners ...StdInOutListener) error {
 	command := exec.Command(commandAndArgs[0], commandAndArgs[1:]...)
-	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
 
 	stdinPipe, err := command.StdinPipe()
 	if err != nil {
-		return errors.Wrap(err, "unable to get stdin pipe")
+		return fmt.Errorf("unable to get stdin pipe: %w", err)
 	}
 	//noinspection GoUnhandledErrorResult
 	defer stdinPipe.Close()
+
+	go RunStdinPumper(stdinPipe)
+	for _, listener := range listeners {
+		listener.UseStdin(stdinPipe)
+	}
+
+	stdoutPipe, err := command.StdoutPipe()
+	if err != nil {
+		return fmt.Errorf("unable to get stdout pipe: %w", err)
+	}
 
 	if uid != 0 || gid != 0 {
 		setCredentials(uid, gid, command)
@@ -31,13 +45,12 @@ func RunCommand(uid uint32, gid uint32, stdinOnTerm string, commandAndArgs []str
 		return err
 	}
 
+	go FanoutStdout(stdoutPipe, listeners...)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	stdinHandler := NewStdinHandler()
-	stdinHandler.Handle(ctx, stdinPipe)
-
-	setupSignalForwarding(ctx, command, stdinOnTerm, stdinHandler)
+	setupSignalForwarding(ctx, command, stdinOnTerm, stdinPipe)
 
 	err = command.Wait()
 	if err != nil {
@@ -47,9 +60,9 @@ func RunCommand(uid uint32, gid uint32, stdinOnTerm string, commandAndArgs []str
 	return nil
 }
 
-func setupSignalForwarding(ctx context.Context, cmd *exec.Cmd, stdinOnTerm string, stdinHandler *StdinHandler) {
+func setupSignalForwarding(ctx context.Context, cmd *exec.Cmd, stdinOnTerm string, stdinPipe io.Writer) {
 	signals := make(chan os.Signal, 1)
-	signal.Notify(signals)
+	signal.Notify(signals, syscall.SIGTERM)
 
 	go func() {
 		for {
@@ -59,7 +72,7 @@ func setupSignalForwarding(ctx context.Context, cmd *exec.Cmd, stdinOnTerm strin
 
 				if stdinOnTerm != "" && sig == syscall.SIGTERM {
 					log.WithField("message", stdinOnTerm).Debug("Sending message on stdin due to SIGTERM")
-					stdinHandler.Send([]byte(stdinOnTerm + "\n"))
+					stdinPipe.Write([]byte(stdinOnTerm + "\n"))
 					continue
 				}
 

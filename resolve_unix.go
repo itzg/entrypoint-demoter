@@ -3,7 +3,7 @@
 package entrypoint_demoter
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
@@ -19,12 +19,12 @@ func ResolveIds(match string) (uint32, uint32, error) {
 
 		matchInfo, err := os.Stat(match)
 		if err != nil {
-			return 0, 0, errors.Wrap(err, "unable to inspect match path")
+			return 0, 0, fmt.Errorf("unable to inspect match path: %w", err)
 		}
 
 		var ok bool
 		if matchStatT, ok = matchInfo.Sys().(*syscall.Stat_t); !ok {
-			return 0, 0, errors.Errorf("unsupported file info stat type: %v", matchInfo.Sys())
+			return 0, 0, fmt.Errorf("unsupported file info stat type: %v: %w", matchInfo.Sys(), err)
 		}
 	}
 
@@ -45,7 +45,7 @@ func resolveIdPart(idPart string, matchStatT *syscall.Stat_t) (uint32, error) {
 	if idStr != "" {
 		desired, err := strconv.Atoi(idStr)
 		if err != nil {
-			return 0, errors.Wrapf(err, "Invalid %s", idPart)
+			return 0, fmt.Errorf("Invalid %s: %w", idPart, err)
 		}
 		log.Debugf("Resolved %d from environment variable %s", desired, idPart)
 		return uint32(desired), nil
@@ -56,7 +56,7 @@ func resolveIdPart(idPart string, matchStatT *syscall.Stat_t) (uint32, error) {
 		} else if idPart == "GID" {
 			desired = matchStatT.Gid
 		} else {
-			return 0, errors.Errorf("unknown id part: %v", idPart)
+			return 0, fmt.Errorf("unknown id part: %v", idPart)
 		}
 
 		log.Debugf("Resolved %s=%d from match path", idPart, desired)

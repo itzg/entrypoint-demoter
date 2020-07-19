@@ -3,7 +3,7 @@
 package entrypoint_demoter
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
@@ -33,7 +33,7 @@ func resolveIdPart(idPart string) (uint32, error) {
 	if idStr != "" {
 		desired, err := strconv.Atoi(idStr)
 		if err != nil {
-			return 0, errors.Wrapf(err, "Invalid %s", idPart)
+			return 0, fmt.Errorf("invalid %s: %w", idPart, err)
 		}
 		log.Debugf("Resolved %d from environment variable %s", desired, idPart)
 		return uint32(desired), nil
