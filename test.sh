@@ -16,9 +16,8 @@ assert() {
 }
 
 docker build -f Dockerfile.test -t entrypoint-demoter-test .
-
+docker run --rm  entrypoint-demoter-test --version
 assert "default" "uid=0(root) gid=0(root) groups=0(root)" "$(docker run --rm  entrypoint-demoter-test id)"
-docker run --rm -u 1000 entrypoint-demoter-test id
 assert "run 1000" "uid=1000 gid=0(root) groups=0(root)" "$(docker run --rm -u 1000 entrypoint-demoter-test id)"
 assert "run 1000:1000" "uid=1000 gid=1000 groups=1000" "$(docker run --rm -u 1000:1000 entrypoint-demoter-test id)"
 assert "match" "uid=1024(test1024) gid=100(users) groups=100(users)" "$(docker run --rm entrypoint-demoter-test --match /test/test1024 id)"
