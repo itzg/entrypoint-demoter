@@ -1,3 +1,4 @@
+//go:build linux || darwin
 // +build linux darwin
 
 package entrypoint_demoter
@@ -67,6 +68,10 @@ func resolveIdPart(idPart string, matchStatT *syscall.Stat_t) (uint32, error) {
 }
 
 func setCredentials(uid uint32, gid uint32, command *exec.Cmd) {
+	if os.Getuid() != 0 {
+		log.Info("Skipping uid/gid change since current user is not root")
+		return
+	}
 	command.SysProcAttr = &syscall.SysProcAttr{
 		Credential: &syscall.Credential{
 			Uid: uid,
