@@ -10,37 +10,20 @@ builds:
     - darwin
     - windows
   goarch:
-    - 386
+    - "386"
     - amd64
     - arm
     - arm64
   goarm:
-    - 6
-    - 7
+    - "6"
+    - "7"
   ignore:
     - goos: darwin
-      goarch: 386
+      goarch: "386"
 archives:
-- replacements:
-    darwin: MacOS
-    linux: Linux
-    windows: Windows
-  format_overrides:
+- format_overrides:
     - goos: windows
       format: zip
-nfpms:
-  - id: default
-    vendor: Geoff Bourne
-    homepage: https://github.com/itzg/entrypoint-demoter
-    maintainer: Geoff Bourne <itzeoff@gmail.com>
-    description: Container entrypoint that can demote uid and gid from env or matching directory
-    license: MIT
-    formats:
-      - deb
-    overrides:
-      rpm:
-        replacements:
-          amd64: x86_64
 checksum:
   name_template: 'checksums.txt'
 snapshot:
