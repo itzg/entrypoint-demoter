@@ -36,3 +36,5 @@ changelog:
     - '^test:'
     - '^ci:'
     - '^misc:'
+release:
+  replace_existing_artifacts: true
