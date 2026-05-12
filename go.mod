@@ -1,8 +1,6 @@
 module github.com/itzg/entrypoint-demoter
 
-go 1.24.0
-
-toolchain go1.25.1
+go 1.26.3
 
 require (
 	github.com/itzg/go-flagsfiller v1.16.0
