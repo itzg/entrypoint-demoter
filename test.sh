@@ -34,4 +34,23 @@ assert "stdin-on-term" "hello" "$(docker logs ${id})"
 # shellcheck disable=SC2086
 docker rm ${id}
 
+# announce, then (after the delay) the stop message.
+# -t must exceed the delay, or the container is killed before the stop message is sent.
+id=$(docker run -d entrypoint-demoter-test --stdin-on-term "stop" --stdin-on-term-announce "warning" --stdin-on-term-delay 1s cat -)
+# shellcheck disable=SC2086
+docker stop -t 5 ${id}
+# shellcheck disable=SC2086
+assert "stdin-on-term-announce" "$(printf 'warning\nstop')" "$(docker logs ${id})"
+# shellcheck disable=SC2086
+docker rm ${id}
+
+# delay without announce: silent grace period, then just the stop message
+id=$(docker run -d entrypoint-demoter-test --stdin-on-term "stop" --stdin-on-term-delay 1s cat -)
+# shellcheck disable=SC2086
+docker stop -t 5 ${id}
+# shellcheck disable=SC2086
+assert "stdin-on-term-delay (no announce)" "stop" "$(docker logs ${id})"
+# shellcheck disable=SC2086
+docker rm ${id}
+
 echo "ALL PASSED"

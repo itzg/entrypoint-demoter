@@ -34,6 +34,14 @@ the sub-command with the current uid and gid.
 - `--stdin-on-term MESSAGE` : some applications prefer to be gracefully stopped with a command on
    stdin rather than handling SIGTERM, such as Minecraft servers. 
    The `MESSAGE` and a newline will be written to the sub-command's stdin when a `TERM` signal is received.
+- `--stdin-on-term-announce MESSAGE` : optional message written to the sub-command's stdin when `TERM`
+   is received, *before* `--stdin-on-term-delay` and the `--stdin-on-term` message — e.g. a heads-up to
+   connected users. A `%delay%` token is replaced with the whole-second value of `--stdin-on-term-delay`
+   (e.g. `say Server stopping in %delay% seconds`).
+- `--stdin-on-term-delay DURATION` : optional wait ([Go duration](https://pkg.go.dev/time#ParseDuration),
+   e.g. `30s`) after `TERM`, before the `--stdin-on-term` message is written — independent of
+   `--stdin-on-term-announce`. A second `TERM` skips the remaining wait. Keep it shorter than the
+   container's stop grace (`docker stop -t`), or the stop message won't be sent before force-kill.
 - `--debug` : enables debug logging
 - `--version` : show version and exit
 

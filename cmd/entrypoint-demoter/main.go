@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
+	"time"
 )
 
 var (
@@ -22,6 +23,10 @@ var config struct {
 	Debug       bool   `usage:"Enable debug logging"`
 	Version     bool   `usage:"Show version info and exit"`
 	StdinOnTerm string `usage:"If set, the given content will be written to the sub-command's stdin when TERM signal is received"`
+
+	StdinOnTermAnnounce string `usage:"If set, written to the sub-command's stdin when TERM is received, before any stdin-on-term-delay and the stdin-on-term content. A %delay% token is replaced with the whole-second value of stdin-on-term-delay."`
+
+	StdinOnTermDelay time.Duration `usage:"If set, waited after TERM (and after writing any stdin-on-term-announce) before the stdin-on-term content is written. Keep shorter than the container's stop grace period."`
 }
 
 func main() {
@@ -51,7 +56,7 @@ func main() {
 		log.WithError(err).Fatal("Failed to resolve IDs")
 	}
 
-	err = entrypoint_demoter.RunCommand(uid, gid, config.StdinOnTerm, args)
+	err = entrypoint_demoter.RunCommand(uid, gid, config.StdinOnTerm, config.StdinOnTermAnnounce, config.StdinOnTermDelay, args)
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			os.Exit(exitErr.ExitCode())
