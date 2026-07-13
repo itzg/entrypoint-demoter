@@ -4,7 +4,7 @@ go 1.26.5
 
 require (
 	github.com/itzg/go-flagsfiller v1.19.0
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 )
 
 require (
