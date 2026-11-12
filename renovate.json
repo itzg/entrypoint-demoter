@@ -12,5 +12,11 @@
       "rangeStrategy": "bump",
       "addLabels": ["go"]
     }
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all non-major dependencies"
+    }
   ]
 }
